@@ -3,5 +3,5 @@ ps3 solutions
 2) .R: R script files, including functions and main scripts for each question
 3) ps3.pdf: solution report (knitr + LaTeX)
 4) ps3.Rnw: solution report (Rnw format)
-5) ps3_R.pdf: solution report (Rmarkdown)
-6) ps3_R.Rmd: solution report (Rmd format)
+5) ps3_R.pdf: No evaluation solution report (Rmarkdown)
+6) ps3_R.Rmd: No evaluation solution report (Rmd format)
