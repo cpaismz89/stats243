@@ -24,7 +24,7 @@ PIKKVF <- function(y, k, threshold = 800, tune = 0){
 }
 
 
-# FYDV second version improved
+# FYKD second version improved
 FYKD2_V2 <- function(x, k, threshold = 800) {
   
   while (TRUE){
@@ -50,7 +50,7 @@ FYKD2_V2 <- function(x, k, threshold = 800) {
 }
 
 
-# FYDV third version improved
+# FYKD third version improved
 FYKD3_V3 <- function(x, k, threshold = 800) {
   
   while (TRUE){
