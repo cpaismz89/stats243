@@ -85,7 +85,7 @@ plotComparisonFYKD_All_AB <- function(x, ks, ntimes = 100, threshold = 800){
   
 }
 
-# Plot function (With original PIKK)
+# Plot function (With original FYKD)
 plotComparisonFYKD_All_A <- function(x, ks, ntimes = 100, threshold = 800){
   
   # Define times as x-labels for each k value
