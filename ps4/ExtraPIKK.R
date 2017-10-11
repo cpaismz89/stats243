@@ -1,0 +1,1 @@
+# Algebraic function using Sample
