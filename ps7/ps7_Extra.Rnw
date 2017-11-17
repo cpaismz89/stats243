@@ -1,0 +1,1212 @@
+\documentclass[11pt]{article}
+\usepackage[left=0.8in,right=0.8in,top=0.5in,bottom=0.8in]{geometry}
+\usepackage{lscape}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\makeatletter
+\def\BState{\State\hskip-\ALG@thistlm}
+\makeatother
+
+\title{Problem Set 7: STAT243}
+\author{Cristobal Pais - cpaismz@berkeley.edu}
+
+\begin{document}
+\maketitle
+
+% Knitr setup 
+<<setup, echo=FALSE, include=FALSE, cache=FALSE>>=
+library(knitr)
+opts_chunk$set(fig.path='figure/theme-', cache.path='cache/theme-', cache=TRUE)
+options(formatR.arrow=TRUE,width=100)
+knit_hooks$set(par=function(before, options, envir){if (before) par(mar=c(4,4,.1,.1),cex.lab=.95,cex.axis=.9,mgp=c(2,.7,0),tcl=-.3)})
+@
+
+% Knitr Theme selection 
+<<select-theme, cache=FALSE, echo=FALSE>>=
+thm = knit_theme$get("default")
+knit_theme$set(thm)
+@
+
+\section*{Problem 1: Simulation}
+
+Based on the information and values provided, we can determine if the standard error properly characterizes the uncertainty of the estimated regression coefficient as follows (clearly, we have far more ways of addressing this):
+
+\begin{itemize}
+	\item[i)] Using our knowledge from the theory behind a regression model, we can compare the distribution of the standard errors from the statistical method and the ones obtained from the simulation approach. Clearly, we will expect them to be very similar when the uncertainty of the estimated regression coefficient is well characterized, as well as a convergence toward a normal distribution. This is based on the fact that the standard errors from a regression model are assumed to be distributed following a normal distribution (as a main assumption of the regression models: residuals come from a normal distribution, usually tested via the Shapiro test) and thus, we should expect the simulated errors to converge to this distribution.
+	
+	Therefore, we can perform some statistical test and/or develop a visual analysis of both distributions and conclude about the good/bad characterization of our simulation study.
+	
+	\item[ii)] Like in any simulation study, we should be aware of the fact that we are estimating values and we do not have the REAL value of the variables of interest since we are taking a sampling (a subset from the total Universe) from a particular distribution. Therefore, we should construct confidence intervals for both the statistical method and the simulation study results in order to be able to establish the values of the regression coefficients with a certain level of significance, where the standard errors distribution plays a fundamental role in order to characterize these intervals.
+	
+	Thus, we would be able to check if the intervals are overlapping between both methods (statistical and simulation) and perform some extra tests such as t-median tests in order to compare the regression values. In this case (as an example), we would expect to not reject the null hypothesis of equal means in the case that both the averages and the standard error values are well characterized by the simulation study.
+	
+	\item[iii)] In addition, it is very important to measure and check if the number of simulations is enough for getting significant results for a selected level of significance/accuracy. As we already saw during the lectures (and our simulation background), there are several ways to asset the number of replications needed in order to satisfy certain study requirements. 
+	
+	\item[iv)] As an extra analysis, depending on the kind of model and data that is being simulated, it is important to check if the errors satisfy the homoscedasticity/heteroscedasticity assumption.
+\end{itemize}
+
+\newpage
+
+
+\section*{Problem 2}
+We have $A$ a symmetric matrix and we want to find the following quantity:
+\begin{eqnarray}
+	{||A||}_2 &=& \sup_{z: {||z||}_2 = 1} \sqrt{{Az}^{T}Az} \\
+	&=& \max_{{z:||z||}_2 = 1} ||Az||
+\end{eqnarray}
+
+Based on our optimization background, we can easily solve this quadratic optimization problem using the classic lagrangian multipliers approach where the constrains (${||z||}_2 = 1$ in this case) can be added to the objective function as a penalized term, using a multiplier $\lambda$ in order to quantify the magnitude of the penalty term (deviations from the optimal/feasible value). Therefore, we proceed as follows: 
+
+\begin{itemize}
+	\item[i)] We penalize the constrain ${||z||}_2 = 1$ with a penalty value $\lambda$.
+	\item[ii)] We construct the Lagrangian function $L(z, \lambda)$ using the squares of both the original objective function and the constraint in order to have a very easy problem (classic trick/manipulation when dealing with norms):
+	\begin{eqnarray}
+		L(z, \lambda) &=& {||Az||}^2 - \lambda({||z||}^2 - 1) \\
+		&=& z^{T}A^{2}z - \lambda (z^{T}z -1)
+	\end{eqnarray}
+	
+	\item[iii)] Now, we optimize the Lagrangian function by taking the derivative with respect to the $z$ vector and equalizing the equation to 0, obtaining:
+	\begin{eqnarray}
+		A^{2} z - \lambda z &=& 0 
+	\end{eqnarray}		
+	
+	\item[iv)] Clearly, the solution of this system is:
+	\begin{eqnarray}
+		\lambda^{*} &=& \text{Eigenvector\_ of\_ } A^{2}			
+	\end{eqnarray}		
+	
+	\item[v)] Since $A$ is symmetric, we know that all its eigenvalues are real numbers and thus, the maximum value reached by $z^{T} A^{2} z$ will be achieved when ${||z||}_2 = 1$ with a maximal eigenvalue of the matrix $A^{2}$. Following the same logic, we can easily decompose the $A$ matrix (since it is symmetric) by its eigenvectors and eigenvalues, as we saw in class:
+	\begin{eqnarray}
+		A &=& \Gamma \Lambda \Gamma^{T}
+	\end{eqnarray}
+	
+	Where $\Gamma$ is the matrix containing the eigenvectors (orthogonal matrix) and $\Lambda$ is a diagonal matrix containing the eigenvalues of $A$. 
+	
+	\item[vi)] Similarly, for $A^{2}$ we have (remembering that $\Gamma$ is orthogonal): 
+	\begin{eqnarray}
+		A^{2} &=& \Gamma \Lambda^{2} \Gamma^{T}
+	\end{eqnarray}		
+	
+	Therefore, the eigenvalues of $A^{2}$ are equivalent to the squares of the eigenvalues of $A$. 
+	
+\end{itemize}
+
+Hence, the simple euclidean norm ${||A||}_2$ consists of the square root attached from the supremum (maximum) of $z^{T} A^{2} z$ when we have an unitary vector norm ${||z||}_2 = 1$ and it is exactly the square root of the maximal eigenvalue that $A^{2}$ can reach, that is equal to the maximal absolute eigenvalue of the original matrix $A$. Thus, we have proven the statement (remember that we optimized the square version of the problem).
+
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+\section*{Problem 3}
+
+\subsection*{a) Eigenvectors \& Eigenvalues}
+We have a regular matrix $X_{n \times p}$ where $n > p$ and we want to show that the right singular vectors of the $X$ matrix are exactly the eigenvectors of the matrix $X^{T}X$ and that the eigenvalues of this new matrix are the squares of the singular values of the original $X$ matrix. In addition, we will show that the $X^{T}X$ matrix is, in fact, a positive semi-definite matrix. \\
+
+In order to prove the first statement, we proceed as follows:
+
+\begin{itemize}
+	\item[i)] We can decompose the $X$ matrix using the known \textit{Singular Value Decomposition} (SVD) method (also known as spectral decomposition) where we have a non-negative diagonal matrix in the center $D_{k \times k}$ and two orthogonal matrices $U_{n \times k}$ (left singular vectors) and $V_{p \times k}$ (right singular vectors) as multiplying factors as follows: 
+	\begin{eqnarray}
+		X &=& U D V^{T}	
+	\end{eqnarray}
+	
+	\item[ii)] Based on the previous expression, we can easily compute $X^{T}X$ using the decomposition:
+	\begin{eqnarray}
+		X^{T}X &=& {(UDV^{T})}^{T} UDV^{T} \\
+		&=& VD^{T}U^{T}UDV^{T} \\
+		&\underbrace{=}_{U \; \text{orthogonal}}& V D^{T} D V^{T} \\
+		&\underbrace{=}_{D \; \text{diagonal}}& V D^{2} V^{T}
+	\end{eqnarray}		
+	
+	From the previous expression (and remembering that $V$ is an orthogonal matrix), we have that the elements of the original diagonal $D$ from the decomposition of $X$, $d_ii \; \forall i \in \lbrace 1,..,k \rbrace$ satisfy:
+	\begin{eqnarray}
+		d_{ii} &=& \sqrt{\lambda_i (X^{T}X)} \\
+		&\underbrace{=}_{\text{by} \; \text{symmetry}}&  \sqrt{\lambda_i (XX^{T})}
+	\end{eqnarray}
+	
+	Therefore, we can easily check that the non-zero right singular vectors	of the $X$ matrix ($V$ matrix) are the eigenvectors associated with $X^{T}X$ and that the non-singular eigenvalues of $X$ are the square root of the non-zero eigenvalues of $X^{T}X$, in other words: the eigenvalues of $X^{T}X$ are the squares of the singular values of the original $X$ matrix. \\
+	
+	As an extra comment notice that this property shows the equivalence between the $SVD$ and the $PCA$ techniques.
+	
+	\item[iii)] For completeness, we can easily obtain the following expression by multiplying both sides of the equation (13) by the corresponding $V^{-1}$ matrices:
+	\begin{eqnarray}
+		V^{T}X^{T}XV &=& D^{2}
+	\end{eqnarray}		
+	
+Here, we can clearly see the fact that the squares of the eigenvalues of $X$ correspond to the eigenvalues of $X^{T}X$ (crossproduct() matrix) and the fact that the right singular vectors ($V$) of $X$ are in fact the eigenvectors of $X^{T}X$.
+	
+\end{itemize}
+
+Based on the previous analysis, we can easily check that the matrix $X^{T}X$ is positive semi-definite. By definition, a positive semi-definite matrix satisfies the following equation:
+\begin{eqnarray}
+	x^{T} A x \geq 0 \Leftrightarrow z^{T} X^{T}X z \geq 0
+\end{eqnarray}
+
+Now, based on our previous analysis we know that $X^{T}X$ can be expressed as:
+\begin{eqnarray}
+	X^{T}X = VD^{2}V^{T] \Leftrightarrow V^{T}X^{T}XV = D^{2}
+\end{eqnarray}
+
+From these equations, we can easily check that replacing $V$ by any other vector/matrix will lead us to a resulting matrix $D^{2} \geq 0$ because all the values in the diagonal are square numbers and thus each of them satisfies $d_{ii}^{2} \geq 0$. Therefore, the matrix $X^{T}X$ is clearly positive semi-definite (the diagonal of the $D$ matrix can have null entries).
+
+
+\subsection*{b) Efficient eigenvalues calculations}
+In this case, we have an $n \times n$ positive semi-definite matrix $\Sigma$. We already computed the eigendecomposition of the $\Sigma$ matrix and thus, we have access to its eigenvectors $u$ and eigenvalues $\lambda$. \\
+
+Now, we want to calculate the eigenvalues from a perturbed $\hat{\Sigma}$ matrix $Z$, such that $Z = \Sigma + cI$ where c is a scalar and $I$ is the identity matrix. The idea is to use our previous computations in order to find the eigenvalues of $Z$ in $O(n)$ arithmetic calculations.\\
+
+In order to perform this, we can proceed as follows:
+\begin{itemize}
+	\item[i)] By definition, we know that if $u$ is an eigenvector of $\Sigma$ with a corresponding eigenvalue $\lambda$, we have the following equality:
+	\begin{eqnarray}
+		\Sigma u &=& \lambda u	
+	\end{eqnarray}
+	
+	\item[ii)] Now, we can create the matrix $Z = \Sigma + cI$ as stated above. Let's suppose that we take the vector $u$ and we multiply $Z$ by it as follows:
+	\begin{eqnarray}
+		Zu &=& (\Sigma + cI)u   \\
+		&=& \Sigma u + cu \\
+		&=& \lambda u + cu \\
+		&=& (\lambda + c)u 
+	\end{eqnarray}		
+	
+	From here, we can see that the vector $u$ corresponding to the $\lambda$ eigenvalue of the $\Sigma$ matrix is in fact the eigenvector corresponding to $\lambda + c$, for the $Z = \Sigma + cI$ matrix.
+	
+	\item[iii)] Using the previous property, we can easily compute all the $n$ eigenvalues of $Z$ by simply perform the $n$ arithmetic operations $(\lambda_i + c)u_i \;\; \forall i \in \lbrace 1,..,n \rbrace$, where $\lambda_i, u_i$ are the $ith$ eigenvalue and eigenvectors of the original $\Sigma$ matrix. \\
+	
+	Hence, we can clearly compute the eigenvalues of $Z$ in $O(n)$ arithmetic operations if we already have the eigendecomposition of the $\Sigma$ matrix.
+	
+	
+\end{itemize} 
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+\section*{Problem 4: Constrained OLS}
+The general approach for this problem consists of following the tricks and efficient steps studied in class in order to optimize the linear algebra operations inside our code such as: 
+\begin{itemize}
+	\item The optimal order of operations: save computational time and use of memory (RAM).
+	\item Possible useful factorization/decomposition (like Cholesky's).
+	\item Avoiding the computation of inverse matrices (back/forward-solve approach)
+	\item Vectorized operations
+\end{itemize}
+
+In this particular case, we have a constrained OLS model where the matrix $A$ represents the coefficients of these constraints and the vector $b$ represents the right-hand side of them. \\
+
+The solution from the classic Lagrange multiplier approach gives us:
+\begin{eqnarray}
+	\hat{\beta} = C^{-1}d + C^{-1}A^{T}{(AC^{-1}A^{T})}^{-1}(-AC^{-1}d + b)
+\end{eqnarray}
+
+where $A \in R^{m \time p}$, $X \in R^{n \times p}, C = X^{T}X \in R^{p \times p}, b \in R^{m}, d = X^{T}Y \in R^{p}$. \\
+
+Therefore, we can analyze each component and term of the global expression in terms of its complexity/amount of calculations in order to determine the most efficient approach:
+
+\begin{itemize}
+	\item[i)] $C^{-1} = (X^{T}X)^{-1}$: In this case, we have that the total amount of memory stored is the order of $p^{2}$ numbers and the calculations for obtaining $C$ are $O(np^{2})$. We would like to avoid the explicit computation of $C^{-1}$ since, as we study in class, the numerical issues associated with the inversion can affect our results and it is clearly not the most optimal way (actually it is a very naive way) of obtaining the desire expression value. \\
+	
+	In this case (in R context), we can start by computing $C = X^{T}X$ using the $crossprod(X)$ function instead of the naive $t(X) \%*\% X$ implementation that is far slower than the $crossprod()$ approach. Once we have the value of $C$ ($O(np^{2})$ operations) we can apply a Cholesky's decomposition to $C$ such that we have $U_{C} = chol(C)$ where $U$ is an upper-triangular matrix. Once we have it, we can use it for computing expressions involving $C^{-1}$ via the $backsolve()$ function. 
+	
+	\item[ii)] $d = X^{T}Y$: The computation of $d$ involves $O(np)$ arithmetic calculations and it is a very useful term due to the fact that its final dimensions make it a scalar instead of a matrix ($d \in R^{p}$). Hence, we should start multiplying some expressions by this vector in order to save computations. \\
+	
+	In the R implementation context for part (b), we can easily compute $d$ as the $crossprod(X,Y)$. A very efficient and simple way of obtaining its value.
+	
+	\item[iii)] $C^{-1}d$: Looking at the expressions, we can see that this term is used twice in the calculations for $\hat{\beta}$. Hence, we can take advantage of this and pre-calculate it. Since we want to avoid explicit inverse matrix calculations, we can again apply a Cholesky's decomposition in order to obtain the value of the expression by solving a series of linear equations. The order of arithmetic operations is $O(p^{2})$\\
+	
+	Important is to notice that in the case of the $-AC^{-1}d$ term it is better to previously compute $C^{-1}d$ and then multiply it by $-A$ since we will multiply a matrix with a scalar instead of two matrices ($-(AC^{-1})d$ vs $-A(C^{-1}d)$).\\
+	
+	For our function in part (b), we will use the fact that $x = C^{-1}d \Leftrightarrow Cx = d$. Therefore, we can use our previously calculated $U_{C}$ upper-triangular matrix for solving the system via two calls of the $backsolve()$ function: $backsolve(U_{C}, backsolve(U_{C}, d, transpose = TRUE))$. 
+	
+	\item[iv)] $C^{-1}A^{T}$: Another term that is used twice in the final computation of $\hat{\beta}$. Here we can use the Cholesky's decomposition approach again in order to avoid the calculation of the inverse of $C$. The order of calculations is $O(p^{2}m)$ if we have the inverse matrix. \\
+	
+	In our function, we will compute its value as in the previous term: using the consecutive $backsolve()$ calls by re-using our $U_{C}$ matrix.
+	
+	\item[v)] In order to calculate the ${(AC^{-1}A^{T})}^{-1} (-AC^{-1}d + b)$ expression we can again use the Cholesky's decomposition as follows: using the fact that $x = {(AC^{-1}A^{T})}^{-1} (-AC^{-1}d + b) \Leftrightarrow (AC^{-1}A^{T})x = (-AC^{-1}d)$ (notice that if $A$ has inverse, we can multiply if on the left side of both equations), we can just calculate the Cholesky's decomposition of the $(AC^{-1}A^{T})$ term, where we already know the value of $C^{-1}A^{T}$ from the previous point. Therefore, we just multiply if by $A$ on the left side and we obtain $U_{AC^{-1}A^{T}}$. \\
+	
+	Once we have the upper-triangular matrix, we can simply use the $backsolve()$ approach in R by multiplying the known values of the right side ($C^{-1}d$) by $-A$ on the left while adding the vector $b$ as follows: $backsolve(U_{AC^{-1}A^{T}}, backsolve(U_{AC^{-1}A^{T}}, (-AC^{-1}d + b), transpose = TRUE))$. 
+	
+	\item[vi)] Using all the previous elements, we can easily compute the value of $\hat{\beta}$ by simply adding the value of $C^{-1}d$ (known) to the previous expression.
+	
+\end{itemize}
+
+Hence, we will implement the previous steps in our R function in part (b), as well as two Naive approaches in order to perform a formal comparison between different approaches.
+
+
+\subsection*{a) Pseudo-Code}
+Based on all the previous analysis, the Pseudo-code for our implementation is as follows:
+
+\begin{algorithm}
+\caption{Pseudo-Code: $\hat{\beta}$ Constrained OLS}\label{euclid}
+\begin{algorithmic}[1]
+\Procedure{Compute BetaCOLS(X, Y, A, b}{}
+\State $d = X^{T}Y$ \hfill \text{\# Computes vector d}
+\State $U_{X} = cholesky\_decomp(X^{t}X)$ \hfill \text{\# Computes the Cholesky's decomp. of } $X^{T}X$
+\State $R_{1} = Backsolve(U_{X}, d)$ \hfill \text{\# Returns } ${(X^{T}X)}^{-1}d$
+\State $R_{2} = Backsolve(U_{X}, A^{T})$ \hfill \text{\# Returns } ${X^{T}X}^{-1}A^{T}$
+\State $U_{AR_2} = cholesky\_decomp(A R2)$ \hfill \text{\# Computes the Cholesky's decomp. of } $AR_2$
+\State $R_3 = -AR_1 + b$ \hfill \text{\# Pre-computes value for backsolving}
+\State $R_4 = Backsolve(UAR_2, R_3)$ \hfill \text{\# Returns } $(A{(X^{T}X)}^{-1}A^{T})(-A{(X^{T}X)}^{-1}d+b)$ 
+\State $\hat{\beta} = R_1 + R_2 R_3$ \hfill \text{\# Computes the final Beta}
+\State \Return $\hat{\beta}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+In this case, the $cholesky\_decomp()$ function is the equivalent to $chol()$ in R while the $Backsolve()$ method is a contraction of the nested $backsolve()$ implementation in R. Therefore, we are following exactly the steps we already discussed above when we were analyzing the most efficient implementation for the algebraic operations needed to compute $\hat{\beta}$.
+
+\newpage
+
+
+
+
+
+
+
+
+
+\subsection*{b) R functions}
+
+In order to perform a formal comparison between a Naive implementation and our already described more efficient approach taking advantage of the Cholesky's decomposition and the use of consecutive $backsolve()$ calls for solving the linear equations instead of calculating the explicit inverse matrices (or using the $solve()$ function), we developed three functions: (1) A naive approach computing everything as-is (no special orders or decomposition), (2) a second Naive approach where computations are performed in an iterative way, and (3) the more efficient approach described at the beginning of this section, using Cholesky's decomposition as the main tool for improving the performance of the function. 
+
+\begin{itemize}
+	\item[1.] The first implementation (Naive approach) consists of calculating the final expression in one line by using the $solve()$ function and explicit multiplications without taking into account the order of the operations:
+\end{itemize}
+
+<<Naive2, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Naive first implementation
+NaiveOLS <- function(A, b, X, Y){
+  # Compute final beta expression (all together)
+  FinalBeta = solve(t(X) %*% X) %*% t(X) %*% Y + 
+              solve(t(X) %*% X) %*% t(A) %*% solve(A %*% solve(t(X) %*% X) %*% 
+              t(A)) %*% (-A %*% solve(t(X) %*% X) %*% t(X) %*% Y + b)
+  
+  return(FinalBeta)
+}
+@
+
+\begin{itemize}
+	\item[2.] In the second implementation we compute the $C$ matrix and its explicit inverse by using the $solve()$ function. Then, each part of the final expression is computed separately and then the final $\hat{\beta}$ vector is computed:
+\end{itemize}
+
+<<Naive1, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Naive second implementation
+Naive2OLS <- function(A, b, X, Y){
+  # C = X^{t} X
+  C = t(X) %*% X
+  
+  # Explicit inverse
+  Cinv = solve(C)
+  
+  # d = X^{t} Y
+  d = t(X) %*% Y
+    
+  # Compute relevant parts of Beta
+  Beta_Naive1 = Cinv %*% d
+  Beta_Naive2_1 = Cinv %*% t(A) 
+  Beta_Naive2_2 = solve(A %*% Beta_Naive2_1) 
+  Beta_Naive2_3 = (-A %*% Cinv %*% d + b)
+    
+  # Compute final beta expression
+  FinalBeta = Beta_Naive1 + Beta_Naive2_1 %*% Beta_Naive2_2 %*% Beta_Naive2_3
+  return(FinalBeta)
+}
+@
+
+\begin{itemize}
+	\item[3)] Finally, the Cholesky's efficient implementation is declared. In this approach, we follow the steps indicated at the beginning of the section, taking advantage of the $crossprod()$, $backsolve()$, and $chol()$ functions in order to avoid the computation of the inverse matrices and we take into account the optimal order (in terms of number of operations and memory usage) of the operations.
+\end{itemize}
+
+<<Chol, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Cholesky decomposition implementation
+CholOLS <- function(A, b, X, Y){
+  # Cholesky implementation
+  # d = X^{t} Y
+  d = crossprod(X, Y)
+  
+  # C^{-1} %*% d
+  U1 = chol(crossprod(X))
+  R1 = backsolve(U1, backsolve(U1, d, transpose = TRUE))
+    
+  # C^{-1} t(A)
+  R2 = backsolve(U1, backsolve(U1, t(A), transpose = TRUE))
+    
+  # (AC^{-1}t(A)) %*% (-AC^{-1}d + b)
+  U2 = chol(A %*% R2)
+  R3 = backsolve(U2, backsolve(U2, -A %*% R1 + b, transpose = TRUE))
+  
+  # Compute final beta    
+  FinalBeta = R1 + R2 %*% R3
+  return(FinalBeta)
+}
+@
+
+
+\begin{itemize}
+	\item[4)] In addition to the previous functions, we define an auxiliary function for generating the data needed to run the code. Hence, all matrices and vectors are randomly generated by giving the main dimensions as the inputs of the function:
+\end{itemize}
+
+<<Data, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Generate data function
+GenerateData <- function(n, m, p){
+  # Data
+  A = matrix(as.integer(runif(n = m * p, 0, 100)), m, p)
+  b = as.integer(runif(n = m, 0, 100))
+  X = matrix(as.integer(runif(n * p, 0, 100)), n, p)
+  Y = as.integer(runif(n = n, 0, 100))
+  
+  return(list(A, b, X, Y))
+}
+@
+
+
+\begin{itemize}
+	\item[5)] In order to perform the comparison, we use the $microbenchmark$ package for checking the summary statistics regarding the performance of each function. 
+\end{itemize}
+
+<<MainComp, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Main Script
+# Loading libraries
+library(microbenchmark)
+
+# Dimensions
+n = 800
+p = 600
+m = 400
+
+# Generate data
+Data = GenerateData(n, m, p)
+@
+
+<<MainComp2, echo=TRUE, eval=TRUE, cache=TRUE, size="footnotesize">>=
+# Benchmark Comparisons
+microbenchmark(NaiveOLS(Data[[1]], Data[[2]], Data[[3]], Data[[4]]),
+               Naive2OLS(Data[[1]], Data[[2]], Data[[3]], Data[[4]]),
+               CholOLS(Data[[1]], Data[[2]], Data[[3]], Data[[4]]),
+               times = 100)
+@
+
+
+Based on the results, we can easily see that the $CholOLS()$ function is the most efficient implementation taking about $1/6$ of the time taken by the first Naive implementation and about half of the second (improved) Naive implementation. Important is to note that the first Naive implementation is by far the worse in terms of performance (one line of computations without any particular order) while the second Naive implementation, although still not efficient, improves its performance in a significant way.
+
+\newpage
+
+
+
+\section*{Problem 5: Two-stage least squares}
+
+Similarly to the previous problem, in this case, we want to solve a series of algebraic operations that can be very slow and, in particular in this case, extremely high memory consuming, leading to out of memory errors unless we have access to a computer with a very large amount of RAM memory. This is due to the fact that the dimensions of the matrices involved in the calculations are extremely large: $X \in R^{60e6 \times 600}$, $Z \in R^{60e6 \times 630}$, and $y \in R^{60e6}$. \\
+
+Looking at the expressions we have:
+\begin{eqnarray}
+	\hat{X} &=& Z{(Z^{T}Z)}^{-1}Z^{T}X \\
+	\hat{\beta} &=& {(\hat{X}^{T} \hat{X})}^{-1} \hat{X}^{T} y
+\end{eqnarray}
+
+\subsection*{I. Approach 1}
+\begin{itemize}
+	\item[1.] In the case of $\hat{X}$ we have that the multiplication between $Z^{T}X$ will give us a $630 \times 600$ matrix (orders of operations $O(2.268e13)$, allowing us to reduce the dimensionality of the problem by performing this operation first. Then, for the computation of the inverse matrix, we can use (again) the Cholesky's decomposition approach in order to use the nested $backsolve()$ functions with $crossprod(Z)$ ($630 \times 630$ matrix, $O(2.3814e13)$ calculations).\\
+	
+	After this, we will have the solution for ${(Z^{T}Z)}^{-1} Z^{T}X$, with dimensions $630 \times 600$. Finally, we just need to multiply it by $Z$ on the right side, obtaining a $6e7 \times 600$ matrix ($\hat{X}$). Clearly, if we are not keeping it exploiting its sparsity, a very large amount of memory will be needed in order to keep it for the second stage (more comments in section (a)).
+	
+	
+	\item[2.] In the second stage, we can start by using the $crossprod()$ function with the $\hat{X}$ matrix and the $y$ vector, obtaining a $600 \times 1$ vector ($O(3.6e10$) calculations). Then, we can again use the Cholesky's decomposition approach for obtaining the final value for $\hat{\beta}$ without explicitly calculating the inverse of the crossproduct of the $\hat{X}$ matrix. Thus, we obtain the final $600 \times 1$ vector.
+\end{itemize}
+
+After this analysis, we are able to answer the main questions of the problem.
+
+
+\subsection*{II. Approach 2}
+\begin{itemize}
+	\item[1.] In a second approach for solving the equations, we can just replace the value of $\hat{X}$ in the $\hat{\beta}$ expression in order to take advantage of the symmetry of the terms inside of it. This way, we obtain the following expression:
+	\begin{eqnarray}
+		\hat{\beta} &=& {(X^{T}Z{(Z^{T}Z)}^{-1}Z^{T}X)}^{-1} X^{T}Z{(Z^{T}Z)}^{-1}Z^{T}y \\
+		&=& {[X^{T} P_{Z} X]}^{-1} [X^{T}P_{Z}y]
+	\end{eqnarray}
+	
+	where $P_{Z} = Z{(Z^{T}Z)}^{-1}Z^{T}$, satisfying $P_{Z} = P_{Z}^{T}$, $P_{Z}P_{Z}^{T} = P_{Z}$, $P_{Z}Z = Z$, and $Z^{T}P_{Z} = Z^{T}$ \\
+	
+	Based on this approach, we can see that if we are able to compute $P_{Z}$, we would only need to multiply it by $X^{T}$ on the left and then we just need to adjust one expression by $X$ and the second one by $y$. However, looking at the dimension of $P_{Z}$ we can see that we will end up performing far more operations than the ones we want, although the expressions are very useful for understanding the value of $\hat{\beta}$ and storing objects. 
+\end{itemize}
+
+
+\subsection*{a) Memory issues}
+Based on the previous discussion, some of the main reasons why we cannot perform this calculation as given in the equations are:
+
+\begin{itemize}
+	\item[i)] At this point, it is clear that one of the main issues for performing the previous calculations consist of the fact that the dimensions of the matrices/vectors are extremely large, with a number of 60 million rows: each object will take/need a huge amount of memory just to be initialized and stored. \\
+	
+	If the matrices (in particular the sparse ones) are not manipulated using special packages such as $spam$, the amount of memory just wasted with $0$s will be very high, demanding more resources from the machine. In addition, each computation/multiplication will require a great amount of memory and CPU usage in order to be performed due to the high dimensionality of the objects: the order of the computations will play a fundamental role in this case. \\
+	
+	As an example, if instead of multiplying $Z^{T}X$, and then calculate ${(Z^{T}Z)}^{-1} Z^{T}X$ via the Cholesky's decomposition we calculate ${(Z^{T}Z)}^{-1} Z^{T}$, we will end up with a lower performance (and higher memory usage) since we will generate larger matrices instead of reducing the dimensionality of the computations.
+
+	\item[ii)] A naive implementation of each of the two stages will lead us to an ``out of memory'' error without any doubts: calculations such as computing the explicit inverse matrices or not using the $crossprod()$ function whenever we can, will lead us to very poor results and out of memory errors (no results will be obtained).
+
+	\item[iii)] In addition, assuming that we have access to a computer with a huge amount of memory, we can still have problems such as numerical imprecision due to inversions and the performance will be still a problem if the implementation is not well developed.
+
+\end{itemize}
+
+
+\subsection*{b) Sparse matrices: efficient code}
+In order to perform a full formal comparison, we developed three main approaches:
+\begin{itemize}
+	\item[i)] \textbf{Direct Two-stage approach}: Using the equations stated, we simply perform the algebraic operations both using a naive and a sparse implementation using the $spam$ package.
+	\item[ii)] \textbf{Step-by-Step approach}: Taking advantage of the structure of the expressions, we perform a series of operations in order to keep the lightest elements in memory while performing the minimum number of arithmetic operations. In this case, we show how important is the order of the operations by comparing three specific implementations, two of them including the use of the $spam$ package.
+	\item[iii)] \textbf{Cholesky's approach:} As with the previous problem, in this third implementation we perform a series of Cholesky's decomposition in order to avoid the explicit calculation of inverse matrices via the known $solve()$ function by replacing it by a nested $backsolve()$ calls. \\
+	
+	\textbf{Note:} After performing some tests, we realized that in the case of the $spam$ package, we need to use a $forwardsolve()$ nested inside a $backsolve()$ in order to obtain the same result as with two $backsolve()$ calls (when no sparsity is exploited). This comes from the fact that the $spam$ objects are treated in a different way in R and thus, adding the $transpose = TRUE$ flag does not have any effect on them.
+\end{itemize}
+
+Hence, we have the following code:
+\begin{itemize}
+	\item[1.] We start by generating random data based on the main dimensions of the matrices. Each matrix is generated in the classic and sparse version using the $spam$ package. The dimensions and the sizes of each object are reported in order to have an initial impression of the advantage (in terms of memory usage) of the $spam$ package when the elements are sparse.
+\end{itemize}
+
+
+<<Spar1, echo=TRUE, eval=TRUE, cache=TRUE>>=
+# Sparse matrices and 2SLS
+# Suppress warnings
+options(warn = -1)
+
+# Loading libraries
+library(spam)
+library(dplyr)
+library(pryr)
+
+# Matrices Dimensions
+r = 1e6  # (60e6)
+m = 55   # (630)
+p = 50   # (600)
+@
+
+<<SparX, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# X matrix
+X = matrix(sample(c(0,1,5,2,6), size = p * r, 
+                  replace = TRUE, 
+                  prob = c(0.9,0.05,0.02,0.02,0.01)),  
+           nrow = r, ncol = p)
+dim(X)
+object_size(X)
+
+# Convert to sparse
+Xsparse = as.spam(X)
+object_size(Xsparse)
+@
+
+Based on the sizes of both objects, we can clearly understand the advantage of working with the $spam$ package when the objects are sparse.
+
+<<SparZ, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Z matrix
+Z = matrix(sample(c(0,1,5,2,6), size = m * r, 
+                  replace = TRUE, 
+                  prob = c(0.9,0.05,0.02,0.02,0.01)),  
+           nrow = r, ncol = m)
+dim(Z)
+object_size(Z)
+
+# Convert to sparse
+Zsparse = as.spam(Z)
+object_size(Zsparse)
+@
+
+Again, here we can see how we can obtain a very good rate of compression when the matrix is Sparse.
+
+<<Spary, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# y vector
+y = as.integer(runif(r, 0, 100))
+dim(y)
+object_size(y)
+
+# Convert to sparse
+ysparse = as.spam(y)
+object_size(ysparse)
+@
+
+Notice that in this case, the $y$ vector is larger (requires more memory) when we convert it to the spam class. This happens because it is not an exploitable sparse object and the conversion adds extra elements (such as pointers and indexes) to the object. 
+
+\begin{itemize}
+	\item[2.] Using our first implementation of a direct calculation of both expressions, we use the following code:
+\end{itemize}
+
+<<Spary1F, echo=TRUE, eval=FALSE, cache=TRUE>>= 
+# 2-stage LS calculations
+# Original approach
+X_hat = Z %*% solve(t(Z) %*% Z) %*% t(Z) %*% X
+object_size(X_hat)
+
+Beta_hat = solve(t(X_hat) %*% X_hat) %*% t(X_hat) %*% y
+object_size(Beta_hat)
+
+# Original approach SPARSE
+X_hat = Zsparse %*% solve.spam(t(Zsparse) %*% Zsparse) %*% t.spam(Zsparse) %*% Xsparse
+object_size(X_hat)
+
+Beta_hat = solve(t.spam(X_hat) %*% X_hat) %*% t.spam(X_hat) %*% y
+object_size(Beta_hat)
+@
+
+Based on the output of the previous code (not included here in order to be able to compile the file), we can easily check that the operations are not carried out by R since the total allocation of memory exceeds the amount of 12 GB of RAM (our computer has 12GB) and thus, all the code fails. The Same situation happens when using the $spam$ package. Therefore, we should move to a different implementation.
+
+\begin{itemize}
+	\item[3.] In this case, three different implementations are coded. The main difference with the Naive implementation lies in the fact that operations are performed in an iterative way, taking into account the importance of the order of the operations as well as the size of each object kept in memory.
+	
+	The first implementation does not exploit the sparse objects and computes explicit inverse matrices for the computations. The code is the following:
+\end{itemize} 
+
+<<SparF2_1, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Auxiliary vector for recording sizes
+Sizes1 = integer(7)
+MSizes1 = integer(3)
+MSizes1[1] = object_size(X)
+MSizes1[2] = object_size(Z)
+MSizes1[3] = object_size(y)
+
+# Original approach improved 1
+# Unused objects are removed every step
+## First Stage
+# (Z^{t} Z)^{-1}
+R0 = solve(crossprod(Z))
+Sizes1[1] = object_size(R0)
+object_size(R0)
+
+# Z (Z^{t} Z)^{-1}
+R01 = Z %*% R0
+rm(R0)
+object_size(R01)
+Sizes1[2] = object_size(R01)
+
+# Z^{t} X
+R02 = t(Z) %*% X
+object_size(R02)
+Sizes1[3] = object_size(R02)
+
+# Final value X_hat
+X_hat = R01 %*% R02 
+rm(R01)
+rm(R02)
+object_size(X_hat)
+Sizes1[4] = object_size(X_hat)
+@
+
+\begin{itemize}
+	\item[] At this point, we have finished the first stage computations without memory issues as with the Naive approach. Now, we solve the second stage:
+\end{itemize}
+
+<<SparF2_12, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+## Second stage
+# (X^{t} X) ^{-1}
+R1 = solve(crossprod(X_hat))
+object_size(R1)
+Sizes1[5] = object_size(R1)
+
+# X_hat^{t} y
+R12 = crossprod(X_hat, y)
+object_size(R12)
+Sizes1[6] = object_size(R12)
+
+# Beta_hat final value
+Beta_hat = R1 %*% R12
+rm(R1)
+rm(R12)
+object_size(Beta_hat)
+Sizes1[7] = object_size(Beta_hat)
+@
+
+\begin{itemize}
+	\item[] Finally, we display the $\hat{\beta}$ vector for visualizing purposes. 
+\end{itemize}
+
+<<SparF2_13, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display the vector (sample)
+Beta_hat[1:5]
+
+# Sizes statistics
+cat("Minimum object size (computed): \t", min(Sizes1), "[bytes]")
+cat("Maximum object size (computed): \t ", max(Sizes1), "[bytes]")
+cat("Total memory used: \t\t\t", sum(Sizes1), "[bytes]")
+cat("Total memory used including matrices: \t", sum(Sizes1) + sum(MSizes1), "[bytes]")
+@
+
+\begin{itemize}
+	\item[] From the previous results, we can see the summary statistics in terms of memory usage of the entire function. Now, we will compare this previous implementation with the use of the $spam$ package.
+\end{itemize}
+
+<<SparF2_21, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Auxiliary vector for recording sizes
+Sizes2 = integer(7)
+MSizes2 = integer(3)
+MSizes2[1] = object_size(Xsparse)
+MSizes2[2] = object_size(Zsparse)
+MSizes2[3] = object_size(ysparse)
+
+# Original approach improved 1: SPARSE
+## First Stage
+# (Z^{t} Z)^{-1}
+R0 = solve(crossprod.spam(Zsparse))
+Sizes2[1] = object_size(R0)
+object_size(R0)
+
+# Z (Z^{t} Z)^{-1}
+R01 = Zsparse %*% R0
+rm(R0)
+Sizes2[2] = object_size(R01)
+object_size(R01)
+
+# Z^{t} X
+R02 = t.spam(Zsparse) %*% Xsparse
+Sizes2[3] = object_size(R02)
+object_size(R02)
+
+# Final value X_hat
+X_hat = R01 %*% R02 
+rm(R01)
+rm(R02)
+object_size(X_hat)
+Sizes2[4] = object_size(X_hat)
+@
+
+\begin{itemize}
+	\item[] As before, we do not have problems after calculating the first stage expressions and we proceed to the second stage of the estimation.
+\end{itemize}
+
+<<SparF2_22, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+## Second stage
+# (X^{t} X) ^{-1}
+R1 = solve.spam(crossprod.spam(X_hat))
+object_size(R1)
+Sizes2[5] = object_size(R1)
+
+# X_hat^{t} y
+R12 = crossprod.spam(X_hat, ysparse)
+object_size(R12)
+Sizes2[6] = object_size(R12)
+
+# Beta_hat final value
+Beta_hat = R1 %*% R12
+rm(R1)
+rm(R12)
+object_size(Beta_hat)
+Sizes2[7] = object_size(Beta_hat)
+@
+
+\begin{itemize}
+	\item[] Finally, we compute and display the final estimation. Based on the results, we can easily see that the results are identical by both methods.
+\end{itemize}
+
+<<SparF2_23, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display the vector (sample)
+Beta_hat[1:5]
+
+# Sizes statistics
+cat("Minimum object size (computed): \t", min(Sizes2), "[bytes]")
+cat("Maximum object size (computed): \t ", max(Sizes2), "[bytes]")
+cat("Total memory used: \t\t\t", sum(Sizes2), "[bytes]")
+cat("Total memory used including matrices: \t", sum(Sizes2) + sum(MSizes2), "[bytes]")
+@
+
+Looking at the total amount of memory needed for performing the operations, we can clearly see that the sparse approach is better (lower amount of memory is needed). At the end of this section, we will compare all the implementations in order to conclude which approach is the most efficient for the current problem.
+
+\begin{itemize}
+	\item[] Finally, the third implementation of the current approach is exactly the same as the previous one but with a specific detail that impacts its performance in a very significant way: In this case, we first multiply ${(Z^{t} Z)}^{-1}$ by $Z^{t} X$ instead of performing $Z{(Z^{t} Z)}^{-1}$. Clearly, we are saving a fair amount of operations since in the first one we will end up multiplying a scalar with a matrix instead of two matrices like in the second approach. 
+	
+	Therefore, we have the following results:
+\end{itemize}
+
+<<SparF3_1, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Auxiliary vector for recording sizes
+Sizes22 = integer(7)
+
+# Original approach improved 1.2: SPARSE with different order
+## First Stage
+# (Z^{t} Z)^{-1}
+R0 = solve(crossprod.spam(Zsparse))
+Sizes22[1] = object_size(R0)
+object_size(R0)
+
+# Z^{t} X
+R01 = t.spam(Zsparse) %*% Xsparse
+Sizes22[2] = object_size(R01)
+object_size(R01)
+
+# (Z^{t} Z)^{-1} Z^{t} X  (Order change step)
+R02 = R0 %*% R01
+rm(R0)
+rm(R01)
+Sizes22[3] = object_size(R02)
+object_size(R02)
+
+# Final value X_hat
+X_hat = Z %*% R02 
+rm(R02)
+object_size(X_hat)
+Sizes22[4] = object_size(X_hat)
+@
+
+<<SparF3_2, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+## Second stage
+# (X^{t} X) ^{-1}
+R1 = solve.spam(crossprod.spam(X_hat))
+object_size(R1)
+Sizes22[5] = object_size(R1)
+
+# X_hat^{t} y
+R12 = crossprod.spam(X_hat, ysparse)
+object_size(R12)
+Sizes22[6] = object_size(R12)
+
+# Beta_hat final value
+Beta_hat = R1 %*% R12
+rm(R1)
+rm(R12)
+object_size(Beta_hat)
+Sizes22[7] = object_size(Beta_hat)
+@	
+
+
+<<SparF3_3, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display the vector (sample)
+Beta_hat[1:5]
+
+# Sizes statistics
+cat("Minimum object size (computed): \t", min(Sizes22), "[bytes]")
+cat("Maximum object size (computed): \t ", max(Sizes22), "[bytes]")
+cat("Total memory used: \t\t\t", sum(Sizes22), "[bytes]")
+cat("Total memory used including matrices: \t", sum(Sizes22) + sum(MSizes2), "[bytes]")
+@
+
+Looking at the total memory usage, we can clearly see the significant impact of the minor change in the order of the operations. In this case, the total amount of memory is about 60\% of the previous implementation.
+
+\begin{itemize}
+	\item[4.] In our final implementation, we take advantage of the Cholesky's decomposition for avoiding the explicit inverse calculations, using the already discussed $backsolve()$ and $forwardsolve()$ functions. \\
+	
+	The first version (not using the $spam$ package) is as follows:
+\end{itemize}
+
+<<SparF4_1, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Auxiliary vector for recording sizes
+Sizes3 = integer(5)
+
+# Original improved 2
+## First stage
+# Cholesky decomposition of Z^{t} Z
+U1 = chol(crossprod(Z))
+object_size(U1)
+Sizes3[1] = object_size(U1)
+
+# Compute (Z^{t}Z)^{-1} Z^{t}X via Cholesky backsolve
+R1 = backsolve(U1, backsolve(U1, t(Z) %*% X, transpose = TRUE))
+rm(U1)
+object_size(R1)
+Sizes3[2] = object_size(R1)
+
+# Compute X_hat
+X_hat = Z %*% R1
+rm(R1)
+object_size(X_hat)
+Sizes3[3] = object_size(X_hat)
+@
+
+\begin{itemize}
+	\item[] Important is to note the size of the objects, remembering that since the $U$ matrices are sparse, we can obtain a very good compression rate when using the $spam$ package.
+\end{itemize}
+
+<<SparF4_2, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+## Second stage
+# Cholesky decomposition of X_hat^{t} X_hat
+U2 = chol(crossprod(X_hat))
+object_size(U2)
+Sizes3[4] = object_size(U2)
+
+# Compute Beta_hat via Cholesky backsolve
+Beta_hat = backsolve(U2, backsolve(U2, crossprod(X_hat, y), transpose = TRUE))
+rm(U2)
+object_size(Beta_hat) 
+Sizes3[5] = object_size(Beta_hat)
+@
+
+<<SparF4_3, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display the vector (sample)
+Beta_hat[1:5]
+
+# Sizes statistics
+cat("Minimum object size (computed): \t", min(Sizes3), "[bytes]")
+cat("Maximum object size (computed): \t ", max(Sizes3), "[bytes]")
+cat("Total memory used: \t\t\t", sum(Sizes3), "[bytes]")
+cat("Total memory used including matrices: \t", sum(Sizes3) + sum(MSizes1), "[bytes]")
+@
+
+
+
+
+
+
+\begin{itemize}
+	\item[] Finally, we implement the Cholesky's decomposition method while working with sparse matrices by using the $spam$ package:
+\end{itemize}
+
+<<SparF5_1, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Auxiliary vector for recording sizes
+Sizes4 = integer(5)
+
+# Original improved 2: SPARSE
+## First stage
+# Cholesky decomposition of Z^{t} Z
+U1 = chol.spam(crossprod.spam(Zsparse), pivot = FALSE)
+object_size(U1)
+Sizes4[1] = object_size(U1)
+
+# Compute (Z^{t}Z)^{-1} Z^{t}X via Cholesky backsolve
+# and forwardsolve (spam package difference)
+R1 = backsolve.spam(U1, forwardsolve.spam(U1, 
+					t.spam(Zsparse) %*% Xsparse, transpose = T))
+rm(U1)
+object_size(R1)
+Sizes4[2] = object_size(R1)
+
+# Compute X_hat
+X_hat = as.spam(Zsparse %*% R1)
+rm(R1)
+object_size(X_hat)
+Sizes4[3] = object_size(X_hat)
+@
+
+<<SparF5_2, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+## Second stage
+# Cholesky decomposition of X_hat^{t} X_hat
+U2 = chol.spam(crossprod.spam(X_hat), pivot = FALSE)
+object_size(U2)
+Sizes4[4] = object_size(U2)
+
+# Compute Beta_hat via Cholesky backsolve and forwardsolve (spam package difference)
+Beta_hat = backsolve.spam(U2, forwardsolve.spam(U2, 
+                                             crossprod.spam(X_hat, ysparse), 
+                                             transpose = T)
+                          )
+rm(U2)
+object_size(Beta_hat) 
+Sizes4[5] = object_size(Beta_hat)
+@
+
+<<SparF5_3, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display the vector (sample)
+Beta_hat[1:5]
+
+# Sizes statistics
+cat("Minimum object size (computed): \t", min(Sizes4), "[bytes]")
+cat("Maximum object size (computed): \t ", max(Sizes4), "[bytes]")
+cat("Total memory used: \t\t\t", sum(Sizes4), "[bytes]")
+cat("Total memory used including matrices: \t", sum(Sizes4) + sum(MSizes2), "[bytes]")
+@
+
+
+
+
+In order to compare the memory usage across all the implementations, we create a DataFrame containing all the relevant information and then we display it to the command line:
+
+<<DataFrame, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Final comparison
+FComp = data.frame("min" = c(min(Sizes1), min(Sizes2), min(Sizes22), 
+                             min(Sizes3), min(Sizes4)),
+                   "max" = c(max(Sizes1), max(Sizes2), max(Sizes22),
+                             max(Sizes3), max(Sizes4)),
+                   "Total" = c(sum(Sizes1), sum(Sizes2), sum(Sizes22),
+                               sum(Sizes3), sum(Sizes4)),                    
+                   "Total_with_Matrices" = c(sum(Sizes1) + sum(MSizes1), 
+                                             sum(Sizes2) + sum(MSizes2),  
+                                             sum(Sizes22) + sum(MSizes2),  
+                                             sum(Sizes3) + sum(MSizes1),
+                                             sum(Sizes4) + sum(MSizes2)),
+                   row.names = c("Method 1", "Method 1 SP", "Method 1 SP+OR", 
+                                 "Method 2", "Method 2 SP")
+                   )
+
+# Display final comparison table
+FComp
+@
+
+Based on the final results, we can easily check that both the first Sparse implementation approach with the special order of operations and the second Sparse implementation that takes advantage of the Cholesky's decomposition uses a very similar amount of total memory during the entire execution (including the matrices), reaching the highest place in terms of performance (solving time and memory usage). On the other hand, we can clearly see that the worst implementation consists of the first Naive approach without using the $spam$ package, followed by the second approach without sparse matrices and then the first sparse approach that is not taking care of the order of operations.\\
+
+Therefore, we have (deeply) described how we would be able to implement the calculations of a two-stage least squares coefficient estimation by taking advantage of all the relevant techniques we have studied during the linear algebra unit during the course.
+
+
+
+
+
+\newpage
+
+\section*{Problem 6: Empirical study eigendecomposition}
+
+In this problem, we would like to empirically explore the condition number of the eigendecomposition and how it affects the computations such as determining the eigenvalues and properties of the original matrix, checking if it is symmetric and/or positive semi-definite. Following the instructions of the statement of the problem, we have the following steps:
+
+\begin{itemize}
+	\item[1.] We create an arbitrary matrix $Z \in R^{n \times n}$ using a random function
+\end{itemize}
+
+<<E1, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+#PS6 Eigendecomposition and condition value
+# Supress warning
+options(warn = -1)
+
+# Loading libraries
+library(matrixcalc)
+
+# Dimension
+n = 100
+
+# Random matrix Z
+Z = matrix(runif(n * n, 0, 100), n, n)
+Z = matrix(runif(n * n), n, n)
+@
+
+\begin{itemize}
+	\item[2.] A symmetric matrix $A$ is generated from $Z^{T}Z$. Then, we extract the eigenvectors of this matrix using the $eigen()$ function and taking out the eigenvectors object, obtaining the matrix $\Gamma$
+\end{itemize}
+
+<<E2, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# A = Z^{T}Z
+A = crossprod(Z)
+
+# Compute Gamma using eigen function
+Gamma = eigen(A)$vectors
+@
+
+\begin{itemize}
+	\item[3.] We define a $Tester()$ function that takes the desired eigenvalues, dimension $n$, and the eigenvectors $\Gamma$ matrix as the main inputs in order to perform all the operations needed for computing the matrix $A_2 = \Gamma \Lambda \Gamma^{T}$, its condition number, check if the values obtained via the call of the $eigen()$ function match the given $\lambda$ values, and compute the square error of this computation: 
+\end{itemize}
+
+<<E3, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Function: Tester
+Tester <- function(evalues, n, Gamma){
+  # Generate the diagonal matrix with eigenvalues
+  Lambda <- matrix(0, ncol = n, nrow = n)
+  diag(Lambda) <- evalues
+
+  # Generate the matrix A by explicit multiplication
+  NewA = Gamma %*% Lambda %*% t(Gamma)
+  
+  # Display eigenvalues by function and reference
+  cat("Eigenvalues by engen()[top4]:", eigen(NewA)$values[1:4], "\n")
+  cat("Actual eigenvalues[top4]:    ", sort(evalues, decreasing = TRUE)[1:4], "\n")
+
+  # Check condition number
+  Condition = max(evalues) / min(evalues)
+  cat("Condition number:", Condition, "\n")
+
+  # Calculate the square error (between eigenvalues)
+  Error = sum((sort(evalues, decreasing = TRUE) - eigen(NewA)$values)^2)
+  cat("Square error:", Error, "\n")
+  
+  # Check if positive semi-definite (uncomment if wanted, from package matrixcalc)
+  #cat("Positive semi-definite:", is.positive.semi.definite(NewA,tol = 1e-3))
+  
+  # Return the square error
+  return(Error)
+}
+@
+
+
+\begin{itemize}
+	\item[4.] Then, a series of different $\Lambda$ diagonal matrices are generated using the previous function by creating a series of different eigenvalue arrays. We start with a series of sequences where we vary the distance between the first (lower) eigenvalue and the largest one, in order to increase the condition number and check its impact in our computations.
+\end{itemize}
+
+<<E4, echo=TRUE, eval=TRUE, cache=FALSE>>= 
+# Square error and Condition number vector
+SE = integer(17)
+CN = integer(17)
+
+##Sequences analysis
+# First Test: all eigenvalues equal to 1
+EigL1 <- rep(1, n)
+SE[1] = Tester(EigL1, n, Gamma)
+CN[1] = max(EigL1) / min(EigL1)
+  
+# Second Test: sequence up to n by 1
+EigL2 <- c(1:n)
+SE[2] = Tester(EigL2, n, Gamma)
+CN[2] = max(EigL2) / min(EigL2)
+
+# Third test: 1 to 100 total n elements
+EigL3 <- seq(1, 100, length = n)
+SE[3] = Tester(EigL3, n, Gamma)
+CN[3] = max(EigL3) / min(EigL3)
+
+# Fourth test: 1 to 1000 
+EigL4 <- seq(1, 1000, length = n)
+SE[4] = Tester(EigL4, n, Gamma)
+CN[4] = max(EigL4) / min(EigL4)
+
+# Fifth test: 1 to 10000
+EigL5 <- seq(1, 10000, length = n)
+SE[5] = Tester(EigL5, n, Gamma)
+CN[5] = max(EigL5) / min(EigL5)
+@
+
+Based on the outputs, we can clearly see how the increase of the condition number is positively correlated with the square error obtained when computing the difference between the eigenvalues calculated by the $eigen()$ function and the ones given as inputs.
+
+<<E5, echo=TRUE, eval=TRUE, cache=FALSE>>= 
+# Sixth test: 1 to 1e5
+EigL6 <- seq(1, 1e5, length = n)
+SE[6] = Tester(EigL6, n, Gamma)
+CN[6] = max(EigL6) / min(EigL6)
+
+# Seventh test: 1 to 1e6
+EigL7 <- seq(1, 1e6, length = n)
+SE[7] = Tester(EigL7, n, Gamma)
+CN[7] = max(EigL7) / min(EigL7)
+
+# Eight test: 1 to 1e16
+EigL8 <- seq(1, 1e16, length = n)
+SE[8] = Tester(EigL8, n, Gamma)
+CN[8] = max(EigL8) / min(EigL8)
+
+# Ninth test: 0.001 to 1e16
+EigL9 <- seq(1e-3, 1e16, length = n)
+SE[9] = Tester(EigL9, n, Gamma)
+CN[9] = max(EigL9) / min(EigL9)
+
+# Tenth test: 1e-6 to 1e16
+EigL10 <- seq(1e-6, 1e16, length = n)
+SE[10] = Tester(EigL10, n, Gamma)
+CN[10] = max(EigL10) / min(EigL10)
+@
+
+As before, we can notice how the magnitude of the error is clearly increasing with the value of the condition number, obtaining very large errors at this point.
+
+<<E6, echo=TRUE, eval=TRUE, cache=FALSE>>= 
+# Eleventh test: 1e-12 to 1e16
+EigL11 <- seq(1e-12, 1e16, length = n)
+SE[11] = Tester(EigL11, n, Gamma)
+CN[11] = max(EigL11) / min(EigL11)
+
+# Twelth test: 1e-16 to 1e16
+EigL12 <- seq(1e-16, 1e16, length = n)
+SE[12] = Tester(EigL12, n, Gamma)
+CN[12] = max(EigL12) / min(EigL12)
+
+# Thirteenth test: 1e-16 to 1e18
+EigL13 <- seq(1e-16, 1e18, length = n)
+SE[13] = Tester(EigL13, n, Gamma)
+CN[13] = max(EigL13) / min(EigL13)
+
+# Fourteenth test: 1e-16 to 1e24
+EigL14 <- seq(1e-16, 1e24, length = n)
+SE[14] = Tester(EigL14, n, Gamma)
+CN[14] = max(EigL14) / min(EigL14)
+
+# Fifteenth test: 1e-16 to 1e32
+EigL15 <- seq(1e-16, 1e32, length = n)
+SE[15] = Tester(EigL15, n, Gamma)
+CN[15] = max(EigL15) / min(EigL15)
+
+# Sixteenth test: 1e-32 to 1e32
+EigL16 <- seq(1e-32, 1e32, length = n)
+SE[16] = Tester(EigL16, n, Gamma)
+CN[16] = max(EigL16) / min(EigL16)
+
+# Seventeenth test: 1e-64 to 1e64
+EigL17 <- seq(1e-64, 1e64, length = n)
+SE[17] = Tester(EigL17, n, Gamma)
+CN[17] = max(EigL17) / min(EigL17)
+@
+
+At this point, the relation is clear: the magnitude of the square error is proportional to the value of the condition number.
+
+<<E7, echo=TRUE, eval=TRUE, cache=TRUE>>= 
+# Display results
+print("Square errors:")
+SE[1:5]
+SE[6:10]
+SE[11:15]
+SE[16:17]
+print("Condition number:")
+CN[1:11]
+CN[12:17]
+@
+
+\textbf{Note}: For all the previous experiments, we checked if the $A_2$ matrix was positive semi-definite using the $matrixcalc$ package, however, we always obtained a $FALSE$ value when testing them indicating that the matrix was not symmetric. We tested it with different tolerance levels and we got the same answer. Therefore, we were not able to perform a deeper empirical study in this field. It is possible that our implementation was not exactly what was expected in the statement of the problem or our code contains an error that we were not able to detect.\\
+
+For completeness, we include extra experiments with random numbers instead of sequences for generating the different eigenvalue vectors:
+
+<<E8, echo=TRUE, eval=TRUE, cache=FALSE>>= 
+## No sequences
+# First test: 0 to 1
+EigL1 <- runif(n, 0, 1)
+Tester(EigL1, n, Gamma)
+
+# Second test: 0 to 10
+EigL2 <- runif(n, 0, 10)
+Tester(EigL2, n, Gamma)
+
+# Third test: 0 to 100
+EigL3 <- runif(n, 0, 100)
+Tester(EigL3, n, Gamma)
+
+# Fourth test: 04 to 1e4
+EigL4 <- runif(n, 0, 1e4)
+Tester(EigL4, n, Gamma)
+
+# Fifth test: 0 to 1e5
+EigL5 <- runif(n, 0, 1e5)
+Tester(EigL5, n, Gamma)
+
+# Sixth test: 0 to 1e6
+EigL6 <- runif(n, 0, 1e6)
+Tester(EigL6, n, Gamma)
+
+# Seventh test: 0 to 1e6
+EigL7 <- runif(n, 0, 1e8)
+Tester(EigL7, n, Gamma)
+
+# Eight test: 0 to 1e6
+EigL8 <- runif(n, 0, 1e10)
+Tester(EigL8, n, Gamma)
+
+# Ninth test: 0 to 1e6
+EigL9 <- runif(n, 0, 1e12)
+Tester(EigL9, n, Gamma)
+
+# Tenth test: 0 to 1e6
+EigL10 <- runif(n, 0, 1e16)
+Tester(EigL10, n, Gamma)
+
+# Eleventh test: 0 to 1e24
+EigL11 <- runif(n, 0, 1e24)
+Tester(EigL11, n, Gamma)
+
+# Tenth test: 0 to 1e32
+EigL12 <- runif(n, 0, 1e32)
+Tester(EigL12, n, Gamma)
+
+# Thirteenth test: 0 to 1e64
+EigL13 <- runif(n, 0, 1e64)
+Tester(EigL13, n, Gamma)
+
+# Fourteenth test: 0 to 1e128
+EigL14 <- runif(n, 0, 1e128)
+Tester(EigL14, n, Gamma)
+
+# Fifteenth test: 0 to 1e256
+EigL15 <- runif(n, 0, 1e256)
+Tester(EigL15, n, Gamma)
+@
+
+Looking at the results, we can clearly check how the Square error is increased in a very significant way every time the condition number is increased and also due to the numerical imprecision produced when we perform arithmetical calculations with numbers of very different magnitude. As an example, we can see that the last test obtains an infinite square error (overflow) while its condition number is not as large as in the previous test. The explanation is clear: since we are dealing with huge numbers, any small error will give us an overflow (inf) value.
+
+\end{document}
